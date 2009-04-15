@@ -1,0 +1,138 @@
+
+execglue is a library for AmigaOS which allows to use the OS4's GetCPUInfo()
+function from OS3 programs, with the additional feature of being able to
+retrieve the PowerPC's PVR as well.
+
+The function documentation is as follow:
+
+
+exec.library/GetCPUInfo
+
+   NAME   
+       GetCPUInfo -- Get information about the current CPU        (V50)
+
+   SYNOPSIS
+       void GetCPUInfo(struct TagItem *tagList);
+
+       void GetCPUInfoTags(ULONG tag1, ...);
+
+   FUNCTION
+       This function is used to retrieve information about the CPU(s)
+       installed.
+
+       This function replaces the ExecBase attention flag mechanism.
+
+   INPUTS 
+       Input to this function is a tag list containing the items to
+       be queried. Each tag item's data must point to a sufficiently
+       large storage where the result is copied to. The list of tag
+       items below lists the size of the required storage in
+       brackets. For example, GCIT_NumberOfCPUs requires a pointer
+       to an uint32, GCIT_ProcessorSpeed requires a pointer to a
+       variable which is of type uint64.
+
+       Currently, the following items are available:
+       
+       GCIT_NumberOfCPUs (uint32 *)
+           Number of CPUs available in the system. This is likely to
+           be 1 at the moment.
+
+       GCIT_Family (uint32 *)
+           CPU family as a symbolic constant. Currently, these are
+           defined:
+               CPUFAMILY_UNKNOWN - Unknown CPU
+               CPUFAMILY_60X  - All PowerPC 60x, like 603 and 604
+               CPUFAMILY_7X0  - All G3 PowerPC 7X0, like 740, 750,
+                                750CXe, 750FX
+               CPUFAMILY_74xx - All G4 PowerPC 74xx, like 7400, 7410,
+                                7441
+
+       GCIT_MachinePVR (uint32 *)
+           Obtain the PVR value of the currently running PPC board.
+
+       GCIT_Model (uint32 *)
+           CPU model as a symbolic constant. Currently, these are
+           defined:
+               CPUTYPE_UNKNOWN         - Unknown CPU
+               CPUTYPE_PPC603E         - PowerPC 603e
+               CPUTYPE_PPC604E    		- PowerPC 604e
+               CPUTYPE_PPC750CXE  		- PowerPC 750CXe
+               CPUTYPE_PPC750FX   		- PowerPC 750FX
+               CPUTYPE_PPC750GX   		- PowerPC 750GX
+               CPUTYPE_PPC7410    		- PowerPC 7410
+               CPUTYPE_PPC74XX_VGER	- PowerPC 7440, 7441, 7450, 7451 (Vger types)
+               CPUTYPE_PPC74XX_APOLLO  - PowerPC 7445, 7447, 7455, 7457 (Apollo 6/7 types)
+
+       GCIT_ModelString (CONST_STRPTR *)
+           CPU model as a read-only string. For example, the 604e would be
+           returned as "PowerPC 604e".
+
+       GCIT_Version (uint32 *)
+           CPU version and revision. The major and minor numbers are
+           returned as a number with the lower 16 bit as 0xVV.R, where
+           VV is the version number, and R is the revision. For
+           example, on a PPC750FX DD2, the result would be 0x0201,
+           depicting a PowerPC 750FX V2.1.
+           Note: If a version is not available, the value returned is
+           0.
+
+       GCIT_VersionString (CONST_STRPTR *)
+           CPU version and revision as a read-only string, in the form
+           "major.minor".
+
+       GCIT_FrontsideSpeed (uint64 *)
+           CPU frontside bus speed.
+           Note: This is actually a 64 bit number.
+
+       GCIT_ProcessorSpeed (uint64 *)
+           CPU internal frequency.
+           Note: This is actually a 64 bit number.
+           
+       GCIT_L1CacheSize (uint32 *)
+       GCIT_L2CacheSize (uint32 *)
+       GCIT_L3CacheSize (uint32 *)
+           Size of the appropriate cache, if available, otherwise 0.
+
+	GCIT_CacheLineSize (uint32 *)
+	    Size of a cache line. Note that this is also the alignment used
+	    by CacheClearE/CacheClearU.
+
+       GCIT_VectorUnit (uint32 *)
+           CPU's vector unit, as a symbolic constant. Currently
+           defined are:
+               VECTORTYPE_NONE     - No vector unit
+               VECTORTYPE_ALTIVEC  - Motorola AltiVec (tm) Unit
+              (VECTORTYPE_VMX      - IBM VMX Unit)
+
+       GCIT_Extensions (CONST_STRPTR *)
+           CPU feature string. The result is a read-only string that
+           describes nonstandard features of the CPU.
+
+       GCIT_CPUPageSize (uint32 *)
+       GCIT_ExecPageSize (uint32 *)
+	    Physical and logical page sizes. CPUPageSize determines the 
+           supported sizes of the CPU, while ExecPageSize determines the
+           supported Exec (i.e. "virtual" page sizes).The latter is the size
+           supported by Exec API functions.
+           In general, these tags return a bit mask. If bit n is set, a page
+           size of 2^n is supported.
+           For example, GCIT_CPUPageSize might return 0x1000, i.e. bit 12
+           is set, hence the CPU supports hardware pages of 4096 bytes.
+
+	GCIT_TimeBaseSpeed (uint64 *)
+	    Speed of the CPU timer.
+           Note: This is actually a 64 bit number.
+
+   EXAMPLE
+
+       /* Query model and version */
+       CONST_STRPTR Model;
+       CONST_STRPTR Version;
+
+       IExec->GetCPUInfoTags(
+               GCIT_ModelString, &Model, 
+               GCIT_VersionString, &Version,
+               TAG_DONE);
+
+       printf("CPU: %s V%s\n", Model, Version);
+

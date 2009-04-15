@@ -1,0 +1,12 @@
+==id $Id: ExecGlue_lib.sfd,v 1.0 2009/04/12 21:01:02 diegocr Exp $
+==base _ExecGlueBase
+==basetype struct Library *
+==libname execglue.library
+==bias 30
+==public
+==include <libraries/execglue.h>
+==include <utility/tagitem.h>
+VOID GetCPUInfo(struct TagItem *tagList) (a0)
+==varargs
+VOID GetCPUInfoTags(ULONG tag1, ...) (a0)
+==end

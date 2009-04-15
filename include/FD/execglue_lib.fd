@@ -1,0 +1,5 @@
+##base _ExecGlueBase
+##public
+##bias 30
+GetCPUInfo(tagList)(a0)
+##end
